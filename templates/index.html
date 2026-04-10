@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Boş Sınıf</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <div class="header">
+        <p id="gun">-</p>
+        <p id="tarih">-</p>
+        <p id="saat">-</p>
+    </div>
+
+    <div class="filtreler">
+        <button onclick="filtrele('tumu')">Tümü</button>
+        <button onclick="filtrele('F')">F Blok</button>
+        <button onclick="filtrele('B')">B Blok</button>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Durum</th>
+                <th>Sınıf</th>
+                <th>Boş saatler</th>
+            </tr>
+        </thead>
+        <tbody id="tablo">
+        </tbody>
+    </table>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+</body>
+</html>
