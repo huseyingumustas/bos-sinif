@@ -1,16 +1,8 @@
-const dersler = [
-    { blok: 'F', sinif: 'F-101', gun: 'Cuma', baslangic: '23:00', bitis: '23:59' },
-    { blok: 'F', sinif: 'F-101', gun: 'Cuma', baslangic: '09:00', bitis: '11:00' },
-    { blok: 'F', sinif: 'F-101', gun: 'Cuma', baslangic: '13:00', bitis: '15:00' },
-    { blok: 'F', sinif: 'F-204', gun: 'Cuma', baslangic: '10:00', bitis: '12:00' },
-    { blok: 'F', sinif: 'F-301', gun: 'Cuma', baslangic: '09:00', bitis: '17:00' },
-    { blok: 'B', sinif: 'B-102', gun: 'Salı', baslangic: '11:00', bitis: '13:00' },
-    { blok: 'B', sinif: 'B-205', gun: 'Salı', baslangic: '09:00', bitis: '11:00' },
-    { blok: 'B', sinif: 'B-310', gun: 'Salı', baslangic: '14:00', bitis: '16:00' },
-    { blok: 'B', sinif: 'B-401', gun: 'Salı', baslangic: '10:00', bitis: '12:00' },
-];
-const gunler = ['Pazar','Pazartesi','Cuma','Çarşamba','Perşembe','Cuma','Cumartesi'];
+const gunler = ['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi'];
 const aylar = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+
+let dersler = [];
+let aktifBlok = 'tumu';
 
 function saatGuncelle() {
     const simdi = new Date();
@@ -18,11 +10,6 @@ function saatGuncelle() {
     document.getElementById('tarih').textContent = `${simdi.getDate()} ${aylar[simdi.getMonth()]} ${simdi.getFullYear()}`;
     document.getElementById('saat').textContent = `${String(simdi.getHours()).padStart(2,'0')}:${String(simdi.getMinutes()).padStart(2,'0')}:${String(simdi.getSeconds()).padStart(2,'0')}`;
 }
-
-saatGuncelle();
-setInterval(saatGuncelle, 1000);
-
-let aktifBlok = 'tumu';
 
 function bosluklariHesapla(sinifAdi) {
     const simdi = new Date();
@@ -82,5 +69,13 @@ function filtrele(blok) {
     tabloGuncelle();
 }
 
-tabloGuncelle();
+async function dersleriyukle() {
+    const response = await fetch('/dersler');
+    dersler = await response.json();
+    tabloGuncelle();
+}
+
+saatGuncelle();
+setInterval(saatGuncelle, 1000);
 setInterval(tabloGuncelle, 60000);
+dersleriyukle();
