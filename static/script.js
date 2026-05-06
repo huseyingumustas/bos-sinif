@@ -55,17 +55,19 @@ function tabloGuncelle() {
     tbody.innerHTML = filtrelenmis.map(sinif => {
         const sonuc = bosluklariHesapla(sinif);
         return `
-            <tr>
-                <td>${sonuc.bos ? '🟢 Boş' : '🔴 Dolu'}</td>
-                <td>${sinif}</td>
-                <td>${sonuc.saatler}</td>
+            <tr onclick="katPlaniGoster('${sinif}')">
+                <td><span class="${sonuc.bos ? 'bos' : 'dolu'}">${sonuc.bos ? 'Boş' : 'Dolu'}</span></td>
+                <td class="sinif-adi">${sinif}</td>
+                <td class="saat-bilgi">${sonuc.saatler}</td>
             </tr>
         `;
     }).join('');
 }
 
-function filtrele(blok) {
+function filtrele(blok, btn) {
     aktifBlok = blok;
+    document.querySelectorAll('.filtreler button').forEach(b => b.classList.remove('aktif'));
+    btn.classList.add('aktif');
     tabloGuncelle();
 }
 
@@ -79,3 +81,33 @@ saatGuncelle();
 setInterval(saatGuncelle, 1000);
 setInterval(tabloGuncelle, 60000);
 dersleriyukle();
+const katPlanlari = {
+    'B-501': 'katplanlar/b_5.jpeg',
+    'B-502': 'katplanlar/b_5.jpeg',
+    'B-511': 'katplanlar/b_5.jpeg',
+    'B-512': 'katplanlar/b_5.jpeg',
+};
+
+function katPlaniGoster(sinif) {
+    const sag = document.getElementById('sag');
+    const plan = katPlanlari[sinif];
+
+    document.querySelectorAll('tbody tr').forEach(tr => tr.classList.remove('secili'));
+    event.currentTarget.classList.add('secili');
+
+    if (plan) {
+        sag.innerHTML = `
+            <div class="kat-plani">
+                <h3>${sinif} — Kat Planı</h3>
+                <img src="/static/${plan}" alt="${sinif} kat planı">
+            </div>
+        `;
+    } else {
+        sag.innerHTML = `
+            <div class="sag-bos">
+                <span>🗺️</span>
+                Bu kat için henüz plan eklenmedi
+            </div>
+        `;
+    }
+}
