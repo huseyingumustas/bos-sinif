@@ -218,3 +218,68 @@ tbody td {
     background: #1a3a6b;
     border-radius: 3px;
 }
+@media (max-width: 768px) {
+    .icerik {
+        grid-template-columns: 1fr;
+    }
+
+    .sag {
+        display: none !important;
+    }
+
+    #saat {
+        font-size: 2rem;
+    }
+
+    body {
+        padding: 1rem;
+    }
+}
+.popup-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.7);
+    z-index: 100;
+    justify-content: center;
+    align-items: center;
+}
+
+.popup-overlay.aktif {
+    display: flex;
+}
+
+.popup-icerik {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    max-width: 90%;
+    width: 500px;
+    position: relative;
+}
+
+.popup-kapat {
+    position: absolute;
+    top: 1rem; right: 1rem;
+    background: #1a3a6b;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px; height: 30px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.popup-icerik img {
+    width: 100%;
+    border-radius: 8px;
+}
+
+.popup-icerik h3 {
+    color: #1a3a6b;
+    margin-bottom: 1rem;
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}

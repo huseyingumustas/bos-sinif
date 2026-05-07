@@ -89,25 +89,24 @@ const katPlanlari = {
 };
 
 function katPlaniGoster(sinif) {
-    const sag = document.getElementById('sag');
     const plan = katPlanlari[sinif];
+    const mobil = window.innerWidth <= 900;
 
     document.querySelectorAll('tbody tr').forEach(tr => tr.classList.remove('secili'));
     event.currentTarget.classList.add('secili');
 
-    if (plan) {
-        sag.innerHTML = `
-            <div class="kat-plani">
-                <h3>${sinif} — Kat Planı</h3>
-                <img src="/static/${plan}" alt="${sinif} kat planı">
-            </div>
-        `;
+    const icerik = plan
+        ? `<h3>${sinif} — Kat Planı</h3><img src="/static/${plan}" alt="${sinif} kat planı">`
+        : `<p style="color:#aaa;text-align:center">Bu kat için henüz plan eklenmedi</p>`;
+
+    if (mobil) {
+        document.getElementById('popup-icerik').innerHTML = icerik;
+        document.getElementById('popup').classList.add('aktif');
     } else {
-        sag.innerHTML = `
-            <div class="sag-bos">
-                <span>🗺️</span>
-                Bu kat için henüz plan eklenmedi
-            </div>
-        `;
+        document.getElementById('sag').innerHTML = `<div class="kat-plani">${icerik}</div>`;
     }
+}
+
+function popupKapat() {
+    document.getElementById('popup').classList.remove('aktif');
 }
