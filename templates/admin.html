@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Paneli</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 2rem; background: #f5f5f5; }
+        h1 { color: #1a3a6b; margin-bottom: 2rem; }
+        form { background: white; padding: 1.5rem; border-radius: 8px; border: 1px solid #1a3a6b; max-width: 400px; margin-bottom: 2rem; }
+        input, select { width: 100%; padding: 0.5rem; margin-bottom: 1rem; border: 1px solid #ccc; border-radius: 4px; }
+        button { background: #1a3a6b; color: white; padding: 0.5rem 1.5rem; border: none; border-radius: 4px; cursor: pointer; }
+        table { background: white; border-collapse: collapse; width: 100%; max-width: 700px; }
+        th, td { padding: 0.75rem 1rem; border-bottom: 1px solid #dde3f0; text-align: left; }
+        th { color: #1a3a6b; }
+        .sil { background: #dc2626; color: white; border: none; padding: 0.3rem 0.75rem; border-radius: 4px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Admin Paneli</h1>
+
+    <form action="/admin/ekle" method="POST">
+        <input name="sifre" type="hidden" value="{{ sifre }}">
+        <select name="blok">
+            <option value="F">F Blok</option>
+            <option value="B">B Blok</option>
+        </select>
+        <input name="sinif" type="text" placeholder="Sınıf (örn: F-301)">
+        <select name="gun">
+            <option>Pazartesi</option>
+            <option>Salı</option>
+            <option>Çarşamba</option>
+            <option>Perşembe</option>
+            <option>Cuma</option>
+        </select>
+        <input name="baslangic" type="time">
+        <input name="bitis" type="time">
+        <button type="submit">Ekle</button>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Sınıf</th>
+                <th>Gün</th>
+                <th>Başlangıç</th>
+                <th>Bitiş</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for ders in dersler %}
+            <tr>
+                <td>{{ ders.sinif }}</td>
+                <td>{{ ders.gun }}</td>
+                <td>{{ ders.baslangic }}</td>
+                <td>{{ ders.bitis }}</td>
+                <td>
+                    <form action="/admin/sil" method="POST" style="margin:0">
+                        <input name="sifre" type="hidden" value="{{ sifre }}">
+                        <input name="id" type="hidden" value="{{ ders.id }}">
+                        <button class="sil" type="submit">Sil</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
