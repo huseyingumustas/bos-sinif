@@ -90,7 +90,7 @@ const katPlanlari = {
 
 function katPlaniGoster(sinif) {
     const plan = katPlanlari[sinif];
-    const mobil = window.innerWidth <= 900;
+    const mobil = document.documentElement.clientWidth <= 900;
 
     document.querySelectorAll('tbody tr').forEach(tr => tr.classList.remove('secili'));
     event.currentTarget.classList.add('secili');
@@ -109,4 +109,13 @@ function katPlaniGoster(sinif) {
 
 function popupKapat() {
     document.getElementById('popup').classList.remove('aktif');
+}
+function mobilAyarla() {
+    const sag = document.getElementById('sag');
+    const genislik = Math.min(window.screen.width, window.screen.height);
+    if (genislik <= 500) {
+        sag.style.setProperty('display', 'none', 'important');
+    } else {
+        sag.style.setProperty('display', 'flex', 'important');
+    }
 }

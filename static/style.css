@@ -218,9 +218,9 @@ tbody td {
     background: #1a3a6b;
     border-radius: 3px;
 }
-@media (max-width: 768px) {
+@media only screen and (max-width: 768px) {
     .icerik {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr !important;
     }
 
     .sag {
@@ -228,11 +228,11 @@ tbody td {
     }
 
     #saat {
-        font-size: 2rem;
+        font-size: 2rem !important;
     }
 
     body {
-        padding: 1rem;
+        padding: 1rem !important;
     }
 }
 .popup-overlay {

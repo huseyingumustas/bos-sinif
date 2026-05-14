@@ -18,7 +18,7 @@ def dersler():
     response = supabase.table('dersler').select('*').execute()
     return jsonify(response.data)
 
-ADMIN_SIFRE = "fbuits2024"
+ADMIN_SIFRE = os.getenv('ADMIN_SIFRE')
 
 @app.route('/admin')
 def admin():
@@ -59,4 +59,4 @@ def admin_sil():
     return redirect(f'/admin?sifre={sifre}')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0')
