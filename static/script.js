@@ -4,6 +4,15 @@ const aylar = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağus
 let dersler = [];
 let aktifBlok = 'tumu';
 
+function tabloMesajiGoster(mesaj) {
+    const tbody = document.getElementById('tablo');
+    tbody.innerHTML = `
+        <tr>
+            <td colspan="3" class="saat-bilgi">${mesaj}</td>
+        </tr>
+    `;
+}
+
 function saatGuncelle() {
     const simdi = new Date();
     document.getElementById('gun').textContent = gunler[simdi.getDay()];
@@ -72,9 +81,21 @@ function filtrele(blok, btn) {
 }
 
 async function dersleriyukle() {
-    const response = await fetch('/dersler');
-    dersler = await response.json();
-    tabloGuncelle();
+    try {
+        const response = await fetch('/dersler');
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || 'Ders verileri alinamadi.');
+        }
+
+        dersler = Array.isArray(data) ? data : [];
+        tabloGuncelle();
+    } catch (error) {
+        console.error('Dersler yuklenemedi:', error);
+        dersler = [];
+        tabloMesajiGoster('Ders verileri su anda yuklenemiyor.');
+    }
 }
 
 saatGuncelle();

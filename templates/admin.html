@@ -13,37 +13,48 @@
         th, td { padding: 0.75rem 1rem; border-bottom: 1px solid #dde3f0; text-align: left; }
         th { color: #1a3a6b; }
         .sil { background: #dc2626; color: white; border: none; padding: 0.3rem 0.75rem; border-radius: 4px; cursor: pointer; }
+        .hata { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; padding: 0.75rem 1rem; border-radius: 8px; max-width: 400px; margin-bottom: 1rem; }
     </style>
 </head>
 <body>
     <h1>Admin Paneli</h1>
 
+    {% if error_message %}
+    <div class="hata">{{ error_message }}</div>
+    {% endif %}
+
     <form action="/admin/ekle" method="POST">
         <input name="sifre" type="hidden" value="{{ sifre }}">
-        <select name="blok">
-            <option value="F">F Blok</option>
-            <option value="B">B Blok</option>
+
+        <select id="blok" name="blok" required>
+            <option value="">Blok secin</option>
+            {% for blok in bloklar %}
+            <option value="{{ blok }}" {% if form_data.blok == blok %}selected{% endif %}>{{ blok }} Blok</option>
+            {% endfor %}
         </select>
-        <input name="sinif" type="text" placeholder="Sınıf (örn: F-301)">
-        <select name="gun">
-            <option>Pazartesi</option>
-            <option>Salı</option>
-            <option>Çarşamba</option>
-            <option>Perşembe</option>
-            <option>Cuma</option>
+
+        <select id="kat" name="kat" required disabled></select>
+        <select id="sinif" name="sinif" required disabled></select>
+
+        <select name="gun" required>
+            <option value="">Gun secin</option>
+            {% for gun in gunler %}
+            <option value="{{ gun }}" {% if form_data.gun == gun %}selected{% endif %}>{{ gun }}</option>
+            {% endfor %}
         </select>
-        <input name="baslangic" type="time">
-        <input name="bitis" type="time">
+
+        <input name="baslangic" type="time" value="{{ form_data.baslangic }}" required>
+        <input name="bitis" type="time" value="{{ form_data.bitis }}" required>
         <button type="submit">Ekle</button>
     </form>
 
     <table>
         <thead>
             <tr>
-                <th>Sınıf</th>
-                <th>Gün</th>
-                <th>Başlangıç</th>
-                <th>Bitiş</th>
+                <th>Sinif</th>
+                <th>Gun</th>
+                <th>Baslangic</th>
+                <th>Bitis</th>
                 <th></th>
             </tr>
         </thead>
@@ -65,5 +76,95 @@
             {% endfor %}
         </tbody>
     </table>
+
+    <script>
+        const sinifConfig = {{ sinif_config_json | safe }};
+        const initialFormData = {{ form_data | tojson }};
+        const blokSelect = document.getElementById('blok');
+        const katSelect = document.getElementById('kat');
+        const sinifSelect = document.getElementById('sinif');
+
+        function optionEkle(select, value, label, selected = false) {
+            const option = document.createElement('option');
+            option.value = value;
+            option.textContent = label;
+            option.selected = selected;
+            select.appendChild(option);
+        }
+
+        function siniflariDoldur(seciliSinif = '') {
+            const blok = blokSelect.value;
+            const kat = katSelect.value;
+            const siniflar = blok && kat && sinifConfig[blok] ? (sinifConfig[blok][kat] || []) : [];
+
+            sinifSelect.innerHTML = '';
+
+            if (!blok) {
+                optionEkle(sinifSelect, '', 'Once blok secin', true);
+                sinifSelect.disabled = true;
+                return;
+            }
+
+            if (!kat) {
+                optionEkle(sinifSelect, '', 'Once kat secin', true);
+                sinifSelect.disabled = true;
+                return;
+            }
+
+            if (!siniflar.length) {
+                optionEkle(sinifSelect, '', 'Bu kat icin tanimli sinif yok', true);
+                sinifSelect.disabled = true;
+                return;
+            }
+
+            optionEkle(sinifSelect, '', 'Sinif secin', seciliSinif === '');
+            siniflar.forEach((sinif) => {
+                optionEkle(sinifSelect, sinif, sinif, seciliSinif === sinif);
+            });
+            sinifSelect.disabled = false;
+        }
+
+        function katlariDoldur(seciliKat = '', seciliSinif = '') {
+            const blok = blokSelect.value;
+            const katlar = blok ? Object.keys(sinifConfig[blok] || {}) : [];
+
+            katSelect.innerHTML = '';
+            sinifSelect.innerHTML = '';
+
+            if (!blok) {
+                optionEkle(katSelect, '', 'Once blok secin', true);
+                optionEkle(sinifSelect, '', 'Once kat secin', true);
+                katSelect.disabled = true;
+                sinifSelect.disabled = true;
+                return;
+            }
+
+            if (!katlar.length) {
+                optionEkle(katSelect, '', 'Bu blok icin tanimli kat yok', true);
+                optionEkle(sinifSelect, '', 'Bu blok icin tanimli sinif yok', true);
+                katSelect.disabled = true;
+                sinifSelect.disabled = true;
+                return;
+            }
+
+            optionEkle(katSelect, '', 'Kat secin', seciliKat === '');
+            katlar.forEach((kat) => {
+                optionEkle(katSelect, kat, `${kat}. Kat`, seciliKat === kat);
+            });
+            katSelect.disabled = false;
+
+            siniflariDoldur(seciliSinif);
+        }
+
+        blokSelect.addEventListener('change', () => {
+            katlariDoldur('', '');
+        });
+
+        katSelect.addEventListener('change', () => {
+            siniflariDoldur('');
+        });
+
+        katlariDoldur(initialFormData.kat || '', initialFormData.sinif || '');
+    </script>
 </body>
 </html>
