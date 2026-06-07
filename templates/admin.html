@@ -14,18 +14,21 @@
         th { color: #1a3a6b; }
         .sil { background: #dc2626; color: white; border: none; padding: 0.3rem 0.75rem; border-radius: 4px; cursor: pointer; }
         .hata { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; padding: 0.75rem 1rem; border-radius: 8px; max-width: 400px; margin-bottom: 1rem; }
+        .ust-bar { display: flex; justify-content: space-between; align-items: center; max-width: 700px; margin-bottom: 1rem; }
+        .cikis-link { color: #1a3a6b; text-decoration: none; font-weight: bold; }
     </style>
 </head>
 <body>
-    <h1>Admin Paneli</h1>
+    <div class="ust-bar">
+        <h1>Admin Paneli</h1>
+        <a class="cikis-link" href="/admin-logout">Cikis Yap</a>
+    </div>
 
     {% if error_message %}
     <div class="hata">{{ error_message }}</div>
     {% endif %}
 
     <form action="/admin/ekle" method="POST">
-        <input name="sifre" type="hidden" value="{{ sifre }}">
-
         <select id="blok" name="blok" required>
             <option value="">Blok secin</option>
             {% for blok in bloklar %}
@@ -67,7 +70,6 @@
                 <td>{{ ders.bitis }}</td>
                 <td>
                     <form action="/admin/sil" method="POST" style="margin:0">
-                        <input name="sifre" type="hidden" value="{{ sifre }}">
                         <input name="id" type="hidden" value="{{ ders.id }}">
                         <button class="sil" type="submit">Sil</button>
                     </form>

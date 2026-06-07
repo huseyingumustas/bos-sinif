@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Girisi</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 2rem; background: #f5f5f5; }
+        .kutu { background: white; padding: 1.5rem; border-radius: 8px; border: 1px solid #1a3a6b; max-width: 400px; }
+        h1 { color: #1a3a6b; margin-bottom: 1rem; }
+        input { width: 100%; padding: 0.6rem; margin-bottom: 1rem; border: 1px solid #ccc; border-radius: 4px; }
+        button { background: #1a3a6b; color: white; padding: 0.6rem 1.5rem; border: none; border-radius: 4px; cursor: pointer; }
+        .hata { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 1rem; }
+    </style>
+</head>
+<body>
+    <div class="kutu">
+        <h1>Admin Girisi</h1>
+
+        {% if error_message %}
+        <div class="hata">{{ error_message }}</div>
+        {% endif %}
+
+        <form action="/admin-login" method="POST">
+            <input name="sifre" type="password" placeholder="Sifre" required>
+            <button type="submit">Giris Yap</button>
+        </form>
+    </div>
+</body>
+</html>
