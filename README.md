@@ -2,6 +2,8 @@
 
 Okuldaki anlik bos siniflari gosteran kucuk bir Flask uygulamasi.
 
+Son guncellemelerle birlikte dashboard tarafinda logo destekli gorunum, status filtresi ve admin tarafinda lockout korumasi bulunur.
+
 ## Teknolojiler
 
 - Python
@@ -35,6 +37,9 @@ copy .env.example .env
 - `SUPABASE_URL`
 - `SUPABASE_KEY`
 - `ADMIN_SIFRE`
+- `FLASK_SECRET_KEY`
+
+`FLASK_SECRET_KEY` production ortaminda zorunludur ve guvenli bir oturum anahtari olarak ayarlanmalidir.
 
 5. Uygulamayi baslatin:
 
@@ -45,7 +50,9 @@ python app.py
 6. Tarayicida su adresleri acin:
 
 - Ana ekran: `http://127.0.0.1:5000/`
-- Admin paneli: `http://127.0.0.1:5000/admin?sifre=ADMIN_SIFRE`
+- Admin girisi: `http://127.0.0.1:5000/admin-login`
+- Admin paneli: giris sonrasinda `http://127.0.0.1:5000/admin`
+- Admin cikisi: `http://127.0.0.1:5000/admin-logout`
 
 ## Beklenen Supabase Tablosu
 
@@ -62,4 +69,7 @@ python app.py
 
 - Bos veya dolu hesaplamasi istemci tarafinda yapilir.
 - Kat planlari su an statik dosya olarak `static/katplanlar/` altinda tutulur.
-- Admin girisi su an basit bir sifre kontrolu ile calisir.
+- `/admin?sifre=...` akisi artik kullanilmaz.
+- Admin girisi artik `/admin-login` uzerinden yapilir ve cikis `/admin-logout` ile yapilir.
+- Dashboard arayuzunde logo destekli gorunum ve status filtresi bulunur.
+- Admin girisinde tekrarli hatali denemelere karsi lockout korumasi vardir.
