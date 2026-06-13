@@ -41,9 +41,13 @@ LOGIN_LOCKOUT_SECONDS = 60
 
 SINIF_CONFIG = {
     'B': {
+        '2': ['B-205'],
+        '3': ['B-310'],
+        '4': ['B-401'],
         '5': ['B-501', 'B-502', 'B-511', 'B-512'],
     },
     'F': {
+        '2': ['F-204'],
         '3': ['F-301'],
     },
 }
@@ -207,6 +211,10 @@ def admin_formunu_dogrula(form_data):
     return None
 
 
+def ders_zamanlari_cakisiyor(muhtemel_baslangic, muhtemel_bitis, mevcut_baslangic, mevcut_bitis):
+    return muhtemel_baslangic < mevcut_bitis and muhtemel_bitis > mevcut_baslangic
+
+
 def admin_panelini_render_et(error_message=None, form_data=None, status_code=200):
     supabase_hatasi = supabase_gerekli_html()
     if supabase_hatasi:
@@ -320,6 +328,34 @@ def admin_ekle():
         return supabase_hatasi
 
     try:
+        yeni_baslangic = saati_dakikaya_cevir(form_data['baslangic'])
+        yeni_bitis = saati_dakikaya_cevir(form_data['bitis'])
+
+        mevcut_dersler = (
+            supabase.table('dersler')
+            .select('baslangic, bitis')
+            .eq('sinif', form_data['sinif'])
+            .eq('gun', form_data['gun'])
+            .execute()
+        )
+
+        for ders in mevcut_dersler.data or []:
+            mevcut_baslangic = saati_dakikaya_cevir(ders.get('baslangic', ''))
+            mevcut_bitis = saati_dakikaya_cevir(ders.get('bitis', ''))
+            if mevcut_baslangic is None or mevcut_bitis is None:
+                continue
+            if ders_zamanlari_cakisiyor(
+                yeni_baslangic,
+                yeni_bitis,
+                mevcut_baslangic,
+                mevcut_bitis,
+            ):
+                return admin_panelini_render_et(
+                    error_message='This classroom already has a conflicting lesson on the selected day and time.',
+                    form_data=form_data,
+                    status_code=400,
+                )
+
         supabase.table('dersler').insert({
             'blok': form_data['blok'],
             'sinif': form_data['sinif'],
