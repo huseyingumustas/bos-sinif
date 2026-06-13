@@ -1,83 +1,250 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Paneli</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
     <style>
-        body { font-family: Arial, sans-serif; padding: 2rem; background: #f5f5f5; }
-        h1 { color: #1a3a6b; margin-bottom: 2rem; }
-        form { background: white; padding: 1.5rem; border-radius: 8px; border: 1px solid #1a3a6b; max-width: 400px; margin-bottom: 2rem; }
-        input, select { width: 100%; padding: 0.5rem; margin-bottom: 1rem; border: 1px solid #ccc; border-radius: 4px; }
-        button { background: #1a3a6b; color: white; padding: 0.5rem 1.5rem; border: none; border-radius: 4px; cursor: pointer; }
-        table { background: white; border-collapse: collapse; width: 100%; max-width: 700px; }
-        th, td { padding: 0.75rem 1rem; border-bottom: 1px solid #dde3f0; text-align: left; }
-        th { color: #1a3a6b; }
-        .sil { background: #dc2626; color: white; border: none; padding: 0.3rem 0.75rem; border-radius: 4px; cursor: pointer; }
-        .hata { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; padding: 0.75rem 1rem; border-radius: 8px; max-width: 400px; margin-bottom: 1rem; }
-        .ust-bar { display: flex; justify-content: space-between; align-items: center; max-width: 700px; margin-bottom: 1rem; }
-        .cikis-link { color: #1a3a6b; text-decoration: none; font-weight: bold; }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            padding: 2rem;
+            background: #f5f5f5;
+            color: #111111;
+        }
+        .sayfa {
+            max-width: 980px;
+            margin: 0 auto;
+        }
+        .ust-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        h1 {
+            color: #1a3a6b;
+            margin: 0;
+            font-size: 2rem;
+        }
+        .cikis-link {
+            color: #1a3a6b;
+            text-decoration: none;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .hata {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+            padding: 0.85rem 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+        }
+        .kart {
+            background: white;
+            border: 1px solid #1a3a6b;
+            border-radius: 14px;
+            padding: 1.5rem;
+            box-shadow: 0 12px 30px rgba(26, 58, 107, 0.06);
+        }
+        .form-karti {
+            margin-bottom: 1.5rem;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1rem;
+            align-items: end;
+        }
+        .alan {
+            display: grid;
+            gap: 0.45rem;
+        }
+        .alan--tam {
+            grid-column: 1 / -1;
+        }
+        label {
+            color: #1a3a6b;
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+        input, select, button {
+            width: 100%;
+            min-height: 46px;
+            padding: 0.75rem 0.9rem;
+            border-radius: 10px;
+            font-size: 0.98rem;
+        }
+        input, select {
+            border: 1px solid #cdd5e1;
+            background: white;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #1a3a6b;
+            box-shadow: 0 0 0 3px rgba(26, 58, 107, 0.12);
+        }
+        button {
+            border: none;
+            background: #1a3a6b;
+            color: white;
+            cursor: pointer;
+            font-weight: 700;
+        }
+        .tablo-karti {
+            overflow: hidden;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+        th, td {
+            padding: 0.95rem 1rem;
+            border-bottom: 1px solid #dde3f0;
+            text-align: left;
+            vertical-align: middle;
+        }
+        th {
+            color: #1a3a6b;
+            font-size: 0.82rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+        .sil-formu {
+            margin: 0;
+        }
+        .sil {
+            min-height: 36px;
+            width: auto;
+            padding: 0.5rem 0.9rem;
+            border-radius: 8px;
+            background: #dc2626;
+        }
+        @media (max-width: 768px) {
+            body { padding: 1rem; }
+            .ust-bar { align-items: flex-start; flex-direction: column; }
+            .form-grid { grid-template-columns: 1fr; }
+            .alan--tam { grid-column: auto; }
+            .kart { padding: 1rem; }
+            table, thead, tbody, th, td, tr { display: block; }
+            thead { display: none; }
+            tbody tr {
+                padding: 0.25rem 0;
+                border-bottom: 1px solid #dde3f0;
+            }
+            td {
+                display: flex;
+                justify-content: space-between;
+                gap: 1rem;
+                padding: 0.65rem 0;
+                border-bottom: none;
+            }
+            td::before {
+                content: attr(data-label);
+                color: #1a3a6b;
+                font-weight: 700;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="ust-bar">
-        <h1>Admin Paneli</h1>
-        <a class="cikis-link" href="/admin-logout">Cikis Yap</a>
+    <div class="sayfa">
+        <div class="ust-bar">
+            <h1>Admin Panel</h1>
+            <a class="cikis-link" href="/admin-logout">Sign Out</a>
+        </div>
+
+        {% if error_message %}
+        <div class="hata">{{ error_message }}</div>
+        {% endif %}
+
+        <div class="kart form-karti">
+            <form action="/admin/ekle" method="POST">
+                <div class="form-grid">
+                    <div class="alan">
+                        <label for="blok">Block</label>
+                        <select id="blok" name="blok" required>
+                            <option value="">Select block</option>
+                            {% for blok in bloklar %}
+                            <option value="{{ blok }}" {% if form_data.blok == blok %}selected{% endif %}>{{ blok }} Block</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="alan">
+                        <label for="kat">Floor</label>
+                        <select id="kat" name="kat" required disabled></select>
+                    </div>
+
+                    <div class="alan">
+                        <label for="sinif">Classroom</label>
+                        <select id="sinif" name="sinif" required disabled></select>
+                    </div>
+
+                    <div class="alan">
+                        <label for="gun">Day</label>
+                        <select id="gun" name="gun" required>
+                            <option value="">Select day</option>
+                            {% for gun in gunler %}
+                            <option value="{{ gun }}" {% if form_data.gun == gun %}selected{% endif %}>{{ day_labels.get(gun, gun) }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="alan">
+                        <label for="baslangic">Start Time</label>
+                        <input id="baslangic" name="baslangic" type="time" value="{{ form_data.baslangic }}" required>
+                    </div>
+
+                    <div class="alan">
+                        <label for="bitis">End Time</label>
+                        <input id="bitis" name="bitis" type="time" value="{{ form_data.bitis }}" required>
+                    </div>
+
+                    <div class="alan alan--tam">
+                        <button type="submit">Add Lesson</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="kart tablo-karti">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Classroom</th>
+                        <th>Day</th>
+                        <th>Start</th>
+                        <th>End</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ders in dersler %}
+                    <tr>
+                        <td data-label="Classroom">{{ ders.sinif }}</td>
+                        <td data-label="Day">{{ day_labels.get(ders.gun, ders.gun) }}</td>
+                        <td data-label="Start">{{ ders.baslangic }}</td>
+                        <td data-label="End">{{ ders.bitis }}</td>
+                        <td data-label="Action">
+                            <form class="sil-formu" action="/admin/sil" method="POST">
+                                <input name="id" type="hidden" value="{{ ders.id }}">
+                                <button class="sil" type="submit">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
-
-    {% if error_message %}
-    <div class="hata">{{ error_message }}</div>
-    {% endif %}
-
-    <form action="/admin/ekle" method="POST">
-        <select id="blok" name="blok" required>
-            <option value="">Blok secin</option>
-            {% for blok in bloklar %}
-            <option value="{{ blok }}" {% if form_data.blok == blok %}selected{% endif %}>{{ blok }} Blok</option>
-            {% endfor %}
-        </select>
-
-        <select id="kat" name="kat" required disabled></select>
-        <select id="sinif" name="sinif" required disabled></select>
-
-        <select name="gun" required>
-            <option value="">Gun secin</option>
-            {% for gun in gunler %}
-            <option value="{{ gun }}" {% if form_data.gun == gun %}selected{% endif %}>{{ gun }}</option>
-            {% endfor %}
-        </select>
-
-        <input name="baslangic" type="time" value="{{ form_data.baslangic }}" required>
-        <input name="bitis" type="time" value="{{ form_data.bitis }}" required>
-        <button type="submit">Ekle</button>
-    </form>
-
-    <table>
-        <thead>
-            <tr>
-                <th>Sinif</th>
-                <th>Gun</th>
-                <th>Baslangic</th>
-                <th>Bitis</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for ders in dersler %}
-            <tr>
-                <td>{{ ders.sinif }}</td>
-                <td>{{ ders.gun }}</td>
-                <td>{{ ders.baslangic }}</td>
-                <td>{{ ders.bitis }}</td>
-                <td>
-                    <form action="/admin/sil" method="POST" style="margin:0">
-                        <input name="id" type="hidden" value="{{ ders.id }}">
-                        <button class="sil" type="submit">Sil</button>
-                    </form>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
 
     <script>
         const sinifConfig = {{ sinif_config_json | safe }};
@@ -102,24 +269,24 @@
             sinifSelect.innerHTML = '';
 
             if (!blok) {
-                optionEkle(sinifSelect, '', 'Once blok secin', true);
+                optionEkle(sinifSelect, '', 'Select a block first', true);
                 sinifSelect.disabled = true;
                 return;
             }
 
             if (!kat) {
-                optionEkle(sinifSelect, '', 'Once kat secin', true);
+                optionEkle(sinifSelect, '', 'Select a floor first', true);
                 sinifSelect.disabled = true;
                 return;
             }
 
             if (!siniflar.length) {
-                optionEkle(sinifSelect, '', 'Bu kat icin tanimli sinif yok', true);
+                optionEkle(sinifSelect, '', 'No classrooms defined for this floor', true);
                 sinifSelect.disabled = true;
                 return;
             }
 
-            optionEkle(sinifSelect, '', 'Sinif secin', seciliSinif === '');
+            optionEkle(sinifSelect, '', 'Select classroom', seciliSinif === '');
             siniflar.forEach((sinif) => {
                 optionEkle(sinifSelect, sinif, sinif, seciliSinif === sinif);
             });
@@ -134,24 +301,24 @@
             sinifSelect.innerHTML = '';
 
             if (!blok) {
-                optionEkle(katSelect, '', 'Once blok secin', true);
-                optionEkle(sinifSelect, '', 'Once kat secin', true);
+                optionEkle(katSelect, '', 'Select a block first', true);
+                optionEkle(sinifSelect, '', 'Select a floor first', true);
                 katSelect.disabled = true;
                 sinifSelect.disabled = true;
                 return;
             }
 
             if (!katlar.length) {
-                optionEkle(katSelect, '', 'Bu blok icin tanimli kat yok', true);
-                optionEkle(sinifSelect, '', 'Bu blok icin tanimli sinif yok', true);
+                optionEkle(katSelect, '', 'No floors defined for this block', true);
+                optionEkle(sinifSelect, '', 'No classrooms defined for this block', true);
                 katSelect.disabled = true;
                 sinifSelect.disabled = true;
                 return;
             }
 
-            optionEkle(katSelect, '', 'Kat secin', seciliKat === '');
+            optionEkle(katSelect, '', 'Select floor', seciliKat === '');
             katlar.forEach((kat) => {
-                optionEkle(katSelect, kat, `${kat}. Kat`, seciliKat === kat);
+                optionEkle(katSelect, kat, `Floor ${kat}`, seciliKat === kat);
             });
             katSelect.disabled = false;
 

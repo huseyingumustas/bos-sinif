@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask import Flask, render_template, jsonify, request, redirect, session, url_for
 from supabase import create_client
 from dotenv import load_dotenv
@@ -28,6 +28,17 @@ ALLOWED_GUNLER = [
     'Cuma',
 ]
 
+DAY_LABELS = {
+    'Pazartesi': 'Monday',
+    'Salı': 'Tuesday',
+    'Çarşamba': 'Wednesday',
+    'Perşembe': 'Thursday',
+    'Cuma': 'Friday',
+}
+
+MAX_FAILED_LOGIN_ATTEMPTS = 5
+LOGIN_LOCKOUT_SECONDS = 60
+
 SINIF_CONFIG = {
     'B': {
         '5': ['B-501', 'B-502', 'B-511', 'B-512'],
@@ -51,21 +62,76 @@ def supabase_hazirla():
 
 
 supabase = supabase_hazirla()
+FAILED_LOGIN_ATTEMPTS = {}
 
 
 def admin_oturumu_var_mi():
     return session.get('admin_authenticated') is True
 
 
+def client_ip_adresi():
+    forwarded_for = request.headers.get('X-Forwarded-For', '')
+    if forwarded_for:
+        return forwarded_for.split(',')[0].strip()
+    return request.remote_addr or 'unknown'
+
+
+def login_deneme_kaydi(ip_adresi):
+    kayit = FAILED_LOGIN_ATTEMPTS.setdefault(
+        ip_adresi,
+        {
+            'failed_count': 0,
+            'locked_until': None,
+        },
+    )
+    locked_until = kayit.get('locked_until')
+    if locked_until is not None and locked_until <= datetime.utcnow():
+        kayit['failed_count'] = 0
+        kayit['locked_until'] = None
+    return kayit
+
+
+def login_engelli_mi(kayit):
+    locked_until = kayit.get('locked_until')
+    return locked_until is not None and locked_until > datetime.utcnow()
+
+
+def kalan_kilit_suresi(kayit):
+    locked_until = kayit.get('locked_until')
+    if locked_until is None:
+        return 0
+    remaining = int((locked_until - datetime.utcnow()).total_seconds())
+    return remaining if remaining > 0 else 0
+
+
+def basarisiz_login_kaydet(ip_adresi):
+    kayit = login_deneme_kaydi(ip_adresi)
+    kayit['failed_count'] += 1
+    if kayit['failed_count'] >= MAX_FAILED_LOGIN_ATTEMPTS:
+        kayit['locked_until'] = datetime.utcnow() + timedelta(seconds=LOGIN_LOCKOUT_SECONDS)
+
+
+def login_kaydini_temizle(ip_adresi):
+    FAILED_LOGIN_ATTEMPTS.pop(ip_adresi, None)
+
+
+def admin_login_sayfasini_render_et(error_message=None, status_code=200, lockout_seconds=0):
+    return render_template(
+        'admin_login.html',
+        error_message=error_message,
+        lockout_seconds=lockout_seconds,
+    ), status_code
+
+
 def supabase_gerekli_json():
     if supabase is None:
-        return jsonify({'error': 'Veri kaynagina su anda ulasilamiyor.'}), 503
+        return jsonify({'error': 'The data source is currently unavailable.'}), 503
     return None
 
 
 def supabase_gerekli_html():
     if supabase is None:
-        return 'Veri kaynagina su anda ulasilamiyor.', 503
+        return 'The data source is currently unavailable.', 503
     return None
 
 
@@ -107,36 +173,36 @@ def admin_formunu_dogrula(form_data):
     bitis = form_data['bitis']
 
     if not blok:
-        return 'Lutfen blok secin.'
+        return 'Please select a block.'
     if blok not in SINIF_CONFIG:
-        return 'Gecersiz blok secildi.'
+        return 'Invalid block selected.'
 
     katlar = SINIF_CONFIG[blok]
     if not kat:
-        return 'Lutfen kat secin.'
+        return 'Please select a floor.'
     if kat not in katlar:
-        return 'Secilen blok icin gecersiz kat secildi.'
+        return 'Invalid floor selected for the chosen block.'
 
     siniflar = katlar[kat]
     if not sinif:
-        return 'Lutfen sinif secin.'
+        return 'Please select a classroom.'
     if sinif not in siniflar:
-        return 'Secilen blok ve kat icin gecersiz sinif secildi.'
+        return 'Invalid classroom selected for the chosen block and floor.'
 
     if not gun:
-        return 'Lutfen gun secin.'
+        return 'Please select a day.'
     if gun not in ALLOWED_GUNLER:
-        return 'Gecersiz gun secildi.'
+        return 'Invalid day selected.'
 
     if not baslangic or not bitis:
-        return 'Baslangic ve bitis saatleri zorunludur.'
+        return 'Start and end times are required.'
 
     baslangic_dakika = saati_dakikaya_cevir(baslangic)
     bitis_dakika = saati_dakikaya_cevir(bitis)
     if baslangic_dakika is None or bitis_dakika is None:
-        return 'Saat formati gecersiz.'
+        return 'Invalid time format.'
     if baslangic_dakika >= bitis_dakika:
-        return 'Baslangic saati bitis saatinden once olmalidir.'
+        return 'Start time must be earlier than end time.'
 
     return None
 
@@ -155,11 +221,12 @@ def admin_panelini_render_et(error_message=None, form_data=None, status_code=200
             form_data=form_data or bos_admin_formu(),
             bloklar=list(SINIF_CONFIG.keys()),
             gunler=ALLOWED_GUNLER,
+            day_labels=DAY_LABELS,
             sinif_config_json=json.dumps(SINIF_CONFIG, ensure_ascii=True),
         ), status_code
     except Exception:
         app.logger.exception('Admin paneli icin dersler alinamadi.')
-        return 'Ders verileri su anda getirilemiyor.', 502
+        return 'Lesson data is currently unavailable.', 502
 
 
 @app.route('/')
@@ -178,26 +245,44 @@ def dersler():
         return jsonify(response.data or [])
     except Exception:
         app.logger.exception('/dersler verisi alinamadi.')
-        return jsonify({'error': 'Ders verileri su anda getirilemiyor.'}), 502
+        return jsonify({'error': 'Lesson data is currently unavailable.'}), 502
 
 
 @app.route('/admin-login')
 def admin_login():
     if admin_oturumu_var_mi():
         return redirect(url_for('admin'))
-    return render_template('admin_login.html', error_message=None), 200
+    return admin_login_sayfasini_render_et()
 
 
 @app.route('/admin-login', methods=['POST'])
 def admin_login_post():
+    ip_adresi = client_ip_adresi()
+    kayit = login_deneme_kaydi(ip_adresi)
     girilen_sifre = (request.form.get('sifre') or '').strip()
 
-    if girilen_sifre != ADMIN_SIFRE:
-        return render_template(
-            'admin_login.html',
-            error_message='Sifre hatali. Lutfen tekrar deneyin.',
-        ), 401
+    if login_engelli_mi(kayit):
+        return admin_login_sayfasini_render_et(
+            error_message=f'Too many failed attempts. Try again in {kalan_kilit_suresi(kayit)} seconds.',
+            status_code=429,
+            lockout_seconds=kalan_kilit_suresi(kayit),
+        )
 
+    if girilen_sifre != ADMIN_SIFRE:
+        basarisiz_login_kaydet(ip_adresi)
+        kayit = login_deneme_kaydi(ip_adresi)
+        if login_engelli_mi(kayit):
+            return admin_login_sayfasini_render_et(
+                error_message=f'Too many failed attempts. Try again in {kalan_kilit_suresi(kayit)} seconds.',
+                status_code=429,
+                lockout_seconds=kalan_kilit_suresi(kayit),
+            )
+        return admin_login_sayfasini_render_et(
+            error_message='Incorrect password. Please try again.',
+            status_code=401,
+        )
+
+    login_kaydini_temizle(ip_adresi)
     session['admin_authenticated'] = True
     return redirect(url_for('admin'))
 
@@ -219,7 +304,7 @@ def admin():
 @app.route('/admin/ekle', methods=['POST'])
 def admin_ekle():
     if not admin_oturumu_var_mi():
-        return 'Yetkisiz', 403
+        return 'Unauthorized', 403
 
     form_data = admin_formunu_hazirla(request.form)
     dogrulama_hatasi = admin_formunu_dogrula(form_data)
@@ -245,7 +330,7 @@ def admin_ekle():
     except Exception:
         app.logger.exception('Ders ekleme islemi basarisiz oldu.')
         return admin_panelini_render_et(
-            error_message='Ders eklenemedi. Lutfen tekrar deneyin.',
+            error_message='Lesson could not be added. Please try again.',
             form_data=form_data,
             status_code=502,
         )
@@ -256,7 +341,7 @@ def admin_ekle():
 @app.route('/admin/sil', methods=['POST'])
 def admin_sil():
     if not admin_oturumu_var_mi():
-        return 'Yetkisiz', 403
+        return 'Unauthorized', 403
 
     supabase_hatasi = supabase_gerekli_html()
     if supabase_hatasi:
@@ -266,7 +351,7 @@ def admin_sil():
         supabase.table('dersler').delete().eq('id', request.form.get('id')).execute()
     except Exception:
         app.logger.exception('Ders silme islemi basarisiz oldu.')
-        return 'Ders silinemedi.', 502
+        return 'Lesson could not be deleted.', 502
 
     return redirect(url_for('admin'))
 

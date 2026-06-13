@@ -1,58 +1,74 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Boş Sınıf</title>
+    <title>Available Classrooms</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-
-    <div class="header">
-    <p id="gun">-</p>
-    <p id="tarih">-</p>
-    <p id="saat">-</p>
-</div>
-
-<div class="popup-overlay" id="popup">
-    <div class="popup-icerik">
-        <button class="popup-kapat" onclick="popupKapat()">✕</button>
-        <div id="popup-icerik"></div>
-    </div>
-</div>
-
-<div class="icerik">
-    <div class="sol">
-        <div class="filtreler">
-            <button class="aktif" onclick="filtrele('tumu', this)">Tümü</button>
-            <button onclick="filtrele('F', this)">F Blok</button>
-            <button onclick="filtrele('B', this)">B Blok</button>
+    <div class="page-shell">
+        <div class="header">
+            <div class="header-logo header-logo--card">
+                <img src="{{ url_for('static', filename='images/fbu-logo.png') }}" alt="Fenerbahce University logo">
+            </div>
+            <div class="header-center">
+                <p id="gun">-</p>
+                <p id="tarih">-</p>
+                <p id="saat">-</p>
+            </div>
+            <div class="header-logo header-logo--card">
+                <img src="{{ url_for('static', filename='images/ieee-logo.jpg') }}" alt="IEEE Fenerbahce University Student Branch logo">
+            </div>
         </div>
-        <table>
-            <thead>
-                <tr>
-                    <th>Durum</th>
-                    <th>Sınıf</th>
-                    <th>Saat</th>
-                </tr>
-            </thead>
-        </table>
-        <div class="tablo-wrapper">
-            <table>
-                <tbody id="tablo"></tbody>
-            </table>
+
+        <div class="popup-overlay" id="popup">
+            <div class="popup-icerik">
+                <button class="popup-kapat" type="button" aria-label="Close floor plan" onclick="popupKapat()">&times;</button>
+                <div id="popup-icerik"></div>
+            </div>
+        </div>
+
+        <div class="icerik">
+            <div class="sol">
+                <div class="filtreler">
+                    <div class="filtre-grubu" data-filter-group="block">
+                        <button class="aktif" onclick="filtreleBlok('tumu', this)">All Blocks</button>
+                        <button onclick="filtreleBlok('F', this)">F Block</button>
+                        <button onclick="filtreleBlok('B', this)">B Block</button>
+                    </div>
+                    <div class="filtre-grubu" data-filter-group="status">
+                        <button class="aktif" onclick="filtreleDurum('tumu', this)">All Status</button>
+                        <button onclick="filtreleDurum('bos', this)">Available</button>
+                        <button onclick="filtreleDurum('dolu', this)">Occupied</button>
+                    </div>
+                </div>
+                <div class="filtre-ozet" id="filtre-ozet">0 classrooms shown &middot; 0 available &middot; 0 occupied</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Status</th>
+                            <th>Classroom</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+                </table>
+                <div class="tablo-wrapper">
+                    <table>
+                        <tbody id="tablo"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="sag" id="sag" style="display:flex">
+                <div class="sag-bos">
+                    <span class="sag-ikon">Floor Plan</span>
+                    <p>Select a classroom to view the floor plan here.</p>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="sag" id="sag" style="display:flex">
-        <div class="sag-bos">
-            <span>🗺️</span>
-            Bir sınıfa tıkla, kat planı burada görünsün
-        </div>
-    </div>
-</div>
-
-<script src="{{ url_for('static', filename='script.js') }}"></script>
-
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
