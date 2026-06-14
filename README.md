@@ -38,6 +38,7 @@ copy .env.example .env
 - `SUPABASE_KEY`
 - `ADMIN_SIFRE`
 - `FLASK_SECRET_KEY`
+- `SESSION_COOKIE_SECURE`
 
 `FLASK_SECRET_KEY` production ortaminda zorunludur ve guvenli bir oturum anahtari olarak ayarlanmalidir.
 
@@ -73,3 +74,11 @@ python app.py
 - Admin girisi artik `/admin-login` uzerinden yapilir ve cikis `/admin-logout` ile yapilir.
 - Dashboard arayuzunde logo destekli gorunum ve status filtresi bulunur.
 - Admin girisinde tekrarli hatali denemelere karsi lockout korumasi vardir.
+
+## Guvenlik ve Production
+
+- `FLASK_DEBUG` varsayilan olarak kapali kalmalidir.
+- `SESSION_COOKIE_SECURE` production ve HTTPS ortaminda `true` yapilmalidir.
+- `FLASK_SECRET_KEY` guclu, tahmin edilmesi zor ve gizli tutulmalidir.
+- `.env` dosyasi GitHub'a gonderilmemelidir.
+- Admin formlarinda CSRF korumasi bulunur.
