@@ -167,6 +167,7 @@
 
         <div class="kart form-karti">
             <form action="/admin/ekle" method="POST">
+                <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
                 <div class="form-grid">
                     <div class="alan">
                         <label for="blok">Block</label>
@@ -235,6 +236,7 @@
                         <td data-label="End">{{ ders.bitis }}</td>
                         <td data-label="Action">
                             <form class="sil-formu" action="/admin/sil" method="POST">
+                                <input name="csrf_token" type="hidden" value="{{ csrf_token }}">
                                 <input name="id" type="hidden" value="{{ ders.id }}">
                                 <button class="sil" type="submit">Delete</button>
                             </form>

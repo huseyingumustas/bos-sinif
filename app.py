@@ -19,6 +19,9 @@ ADMIN_SIFRE = os.getenv('ADMIN_SIFRE')
 # Development fallback: if FLASK_SECRET_KEY is missing, generate a temporary key
 # so sessions still work locally. Production should always set FLASK_SECRET_KEY.
 app.secret_key = os.getenv('FLASK_SECRET_KEY') or secrets.token_hex(32)
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['SESSION_COOKIE_SECURE'] = os.getenv('SESSION_COOKIE_SECURE', '').strip().lower() in ('1', 'true', 'yes', 'on')
 
 ALLOWED_GUNLER = [
     'Pazartesi',
@@ -127,9 +130,24 @@ def login_kaydini_temizle(ip_adresi):
     FAILED_LOGIN_ATTEMPTS.pop(ip_adresi, None)
 
 
+def csrf_token_getir_veya_olustur():
+    csrf_token = session.get('csrf_token')
+    if not csrf_token:
+        csrf_token = secrets.token_urlsafe(32)
+        session['csrf_token'] = csrf_token
+    return csrf_token
+
+
+def csrf_token_gecerli_mi():
+    session_token = session.get('csrf_token', '')
+    form_token = request.form.get('csrf_token', '')
+    return bool(session_token) and bool(form_token) and secrets.compare_digest(session_token, form_token)
+
+
 def admin_login_sayfasini_render_et(error_message=None, status_code=200, lockout_seconds=0):
     return render_template(
         'admin_login.html',
+        csrf_token=csrf_token_getir_veya_olustur(),
         error_message=error_message,
         lockout_seconds=lockout_seconds,
     ), status_code
@@ -238,6 +256,7 @@ def admin_panelini_render_et(error_message=None, form_data=None, status_code=200
             bloklar=list(SINIF_CONFIG.keys()),
             gunler=ALLOWED_GUNLER,
             day_labels=DAY_LABELS,
+            csrf_token=csrf_token_getir_veya_olustur(),
             sinif_config_json=json.dumps(SINIF_CONFIG, ensure_ascii=True),
         ), status_code
     except Exception:
@@ -279,6 +298,12 @@ def admin_login_post():
     ip_adresi = client_ip_adresi()
     kayit = login_deneme_kaydi(ip_adresi)
     girilen_sifre = (request.form.get('sifre') or '').strip()
+
+    if not csrf_token_gecerli_mi():
+        return admin_login_sayfasini_render_et(
+            error_message='Invalid or missing security token. Please try again.',
+            status_code=400,
+        )
 
     if login_engelli_mi(kayit):
         return admin_login_sayfasini_render_et(
@@ -326,6 +351,13 @@ def admin_ekle():
         return 'Unauthorized', 403
 
     form_data = admin_formunu_hazirla(request.form)
+    if not csrf_token_gecerli_mi():
+        return admin_panelini_render_et(
+            error_message='Invalid or missing security token. Please try again.',
+            form_data=form_data,
+            status_code=400,
+        )
+
     dogrulama_hatasi = admin_formunu_dogrula(form_data)
     if dogrulama_hatasi:
         return admin_panelini_render_et(
@@ -390,12 +422,33 @@ def admin_sil():
     if not admin_oturumu_var_mi():
         return 'Unauthorized', 403
 
+    if not csrf_token_gecerli_mi():
+        return admin_panelini_render_et(
+            error_message='Invalid or missing security token. Please try again.',
+            status_code=400,
+        )
+
+    ders_id_raw = (request.form.get('id') or '').strip()
+    if not ders_id_raw:
+        return admin_panelini_render_et(
+            error_message='Missing lesson id for deletion.',
+            status_code=400,
+        )
+
+    try:
+        ders_id = int(ders_id_raw)
+    except ValueError:
+        return admin_panelini_render_et(
+            error_message='Invalid lesson id for deletion.',
+            status_code=400,
+        )
+
     supabase_hatasi = supabase_gerekli_html()
     if supabase_hatasi:
         return supabase_hatasi
 
     try:
-        supabase.table('dersler').delete().eq('id', request.form.get('id')).execute()
+        supabase.table('dersler').delete().eq('id', ders_id).execute()
     except Exception:
         app.logger.exception('Ders silme islemi basarisiz oldu.')
         return 'Lesson could not be deleted.', 502
