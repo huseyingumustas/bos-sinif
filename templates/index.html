@@ -69,6 +69,9 @@
         </div>
     </div>
 
+    <script>
+        window.ALL_CLASSROOMS = {{ all_classrooms_json | safe }};
+    </script>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

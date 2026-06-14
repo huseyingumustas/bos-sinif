@@ -53,6 +53,14 @@ SINIF_CONFIG = {
 }
 
 
+def tum_tanimli_siniflari_getir():
+    siniflar = []
+    for katlar in SINIF_CONFIG.values():
+        for kat_siniflari in katlar.values():
+            siniflar.extend(kat_siniflari)
+    return siniflar
+
+
 def supabase_hazirla():
     if not SUPABASE_URL or not SUPABASE_KEY:
         app.logger.error('Supabase ortam degiskenleri eksik.')
@@ -239,7 +247,10 @@ def admin_panelini_render_et(error_message=None, form_data=None, status_code=200
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template(
+        'index.html',
+        all_classrooms_json=json.dumps(tum_tanimli_siniflari_getir(), ensure_ascii=True),
+    )
 
 
 @app.route('/dersler')
@@ -393,4 +404,5 @@ def admin_sil():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0')
+    debug_mode = os.getenv('FLASK_DEBUG', '').strip().lower() in ('1', 'true', 'yes', 'on')
+    app.run(debug=debug_mode, host='0.0.0.0')

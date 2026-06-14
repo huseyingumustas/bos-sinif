@@ -19,6 +19,7 @@ let dersler = [];
 let aktifBlok = 'tumu';
 let aktifDurum = 'tumu';
 let seciliSinif = '';
+const tumSiniflar = Array.isArray(window.ALL_CLASSROOMS) ? window.ALL_CLASSROOMS : [];
 
 function timeCellHtml(sonuc) {
     if (sonuc.timeTag && sonuc.timeValue) {
@@ -111,9 +112,7 @@ function selectedClassInfo(sinif) {
 }
 
 function filtrelenmisSiniflariGetir() {
-    const siniflar = [...new Set(dersler.map((d) => d.sinif))];
-
-    return siniflar
+    return tumSiniflar
         .map((sinif) => {
             const sonuc = bosluklariHesapla(sinif);
             return { sinif, ...sonuc };
