@@ -1,63 +1,96 @@
-# Bos Sinif
+# Classroom Availability System
 
-Okuldaki anlik bos siniflari gosteran kucuk bir Flask uygulamasi.
+A Flask-based web application that helps students quickly find available classrooms by displaying real-time classroom availability using Supabase as the backend database.
 
-Son guncellemelerle birlikte dashboard tarafinda logo destekli gorunum, status filtresi ve admin tarafinda lockout korumasi bulunur.
+The application features an intuitive dashboard with classroom status filtering, floor plan support, logo integration, and a secure admin panel protected against repeated failed login attempts.
 
-## Teknolojiler
+> **Note:** This project was developed using AI-assisted programming tools (OpenAI Codex/ChatGPT) under my direction. I defined the project requirements, reviewed and integrated the generated code, tested the application, and made iterative improvements throughout the development process.
+
+---
+
+## Features
+
+- Real-time classroom availability
+- Interactive dashboard
+- Classroom status filtering
+- Floor plan support
+- Secure admin authentication
+- Login lockout protection against repeated failed attempts
+- CSRF protection for admin forms
+- Responsive user interface
+
+---
+
+## Technologies
 
 - Python
 - Flask
 - Supabase
-- Duz HTML, CSS ve JavaScript
+- HTML
+- CSS
+- JavaScript
 
-## Kurulum
+---
 
-1. Sanal ortam olusturun:
+## Installation
+
+### 1. Create a virtual environment
 
 ```powershell
 python -m venv .venv
 .venv\Scripts\Activate.ps1
 ```
 
-2. Bagimliliklari yukleyin:
+### 2. Install dependencies
 
 ```powershell
 pip install -r requirements.txt
 ```
 
-3. Ortam degiskenlerini hazirlayin:
+### 3. Create the environment file
 
 ```powershell
 copy .env.example .env
 ```
 
-4. `.env` icini kendi degerlerinizle doldurun:
+### 4. Configure environment variables
 
-- `SUPABASE_URL`
-- `SUPABASE_KEY`
-- `ADMIN_SIFRE`
-- `FLASK_SECRET_KEY`
-- `SESSION_COOKIE_SECURE`
+Fill the `.env` file with your own values:
 
-`FLASK_SECRET_KEY` production ortaminda zorunludur ve guvenli bir oturum anahtari olarak ayarlanmalidir.
+```text
+SUPABASE_URL=
+SUPABASE_KEY=
+ADMIN_PASSWORD=
+FLASK_SECRET_KEY=
+SESSION_COOKIE_SECURE=
+```
 
-5. Uygulamayi baslatin:
+`FLASK_SECRET_KEY` should be a strong, randomly generated secret key.
+
+---
+
+### 5. Run the application
 
 ```powershell
 python app.py
 ```
 
-6. Tarayicida su adresleri acin:
+---
 
-- Ana ekran: `http://127.0.0.1:5000/`
-- Admin girisi: `http://127.0.0.1:5000/admin-login`
-- Admin paneli: giris sonrasinda `http://127.0.0.1:5000/admin`
-- Admin cikisi: `http://127.0.0.1:5000/admin-logout`
+### 6. Open in your browser
 
-## Beklenen Supabase Tablosu
+| Page | URL |
+|------|-----|
+| Home | http://127.0.0.1:5000/ |
+| Admin Login | http://127.0.0.1:5000/admin-login |
+| Admin Dashboard | http://127.0.0.1:5000/admin |
+| Admin Logout | http://127.0.0.1:5000/admin-logout |
 
-`dersler` tablosunda en az su alanlar bekleniyor:
+---
+
+## Database Schema
+
+The application expects a Supabase table named **`dersler`** containing at least the following fields:
 
 - `id`
 - `blok`
@@ -66,19 +99,58 @@ python app.py
 - `baslangic`
 - `bitis`
 
-## Notlar
+---
 
-- Bos veya dolu hesaplamasi istemci tarafinda yapilir.
-- Kat planlari su an statik dosya olarak `static/katplanlar/` altinda tutulur.
-- `/admin?sifre=...` akisi artik kullanilmaz.
-- Admin girisi artik `/admin-login` uzerinden yapilir ve cikis `/admin-logout` ile yapilir.
-- Dashboard arayuzunde logo destekli gorunum ve status filtresi bulunur.
-- Admin girisinde tekrarli hatali denemelere karsi lockout korumasi vardir.
+## Project Structure
 
-## Guvenlik ve Production
+```
+.
+├── app.py
+├── requirements.txt
+├── .env.example
+├── static/
+│   ├── css/
+│   ├── js/
+│   ├── images/
+│   └── katplanlar/
+├── templates/
+└── README.md
+```
 
-- `FLASK_DEBUG` varsayilan olarak kapali kalmalidir.
-- `SESSION_COOKIE_SECURE` production ve HTTPS ortaminda `true` yapilmalidir.
-- `FLASK_SECRET_KEY` guclu, tahmin edilmesi zor ve gizli tutulmalidir.
-- `.env` dosyasi GitHub'a gonderilmemelidir.
-- Admin formlarinda CSRF korumasi bulunur.
+---
+
+## Security
+
+- Production-ready session management
+- Secure admin authentication
+- CSRF protection
+- Login lockout protection
+- Sensitive configuration stored in `.env`
+- HTTPS support through `SESSION_COOKIE_SECURE`
+
+---
+
+## Production Recommendations
+
+- Keep `FLASK_DEBUG` disabled.
+- Set `SESSION_COOKIE_SECURE=true` when using HTTPS.
+- Use a strong and unpredictable `FLASK_SECRET_KEY`.
+- Never commit your `.env` file to GitHub.
+- Rotate secrets if they become compromised.
+
+---
+
+## Future Improvements
+
+- Role-based authentication
+- Classroom reservation system
+- Live schedule synchronization
+- Mobile-friendly interface
+- Notification system
+- Analytics dashboard
+
+---
+
+## License
+
+This project is intended for educational purposes.
